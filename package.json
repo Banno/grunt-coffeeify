@@ -39,5 +39,9 @@
   },
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "dependencies": {
+    "coffeeify": "0.0.0",
+    "browserify": "~2.6.0"
+  }
 }
