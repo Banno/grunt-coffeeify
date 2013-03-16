@@ -32,10 +32,18 @@ module.exports = function(grunt) {
     coffeeify: {
       default_options: {
         options: {
+          transform: 'coffeeify',
+          insertGlobals: false,
+          detectGlobals: true,
+          ignoreMissing: false,
+          debug: false
         },
-        files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123'],
-        },
+        files: [
+          {
+            src: 'test/fixtures/main.coffee',
+            dest: 'tmp/bundle.js'
+          }
+        ],
       },
       custom_options: {
         options: {
