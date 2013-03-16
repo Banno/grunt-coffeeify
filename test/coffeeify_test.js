@@ -68,7 +68,7 @@ exports.coffeeify = {
       },
       files: [
 	{
-          src: 'test/fixtures/main/coffee', dest: 'tmp/customBundle.js'
+          src: 'test/fixtures/main.coffee', dest: 'tmp/customBundle.js'
 	}
       ]
     };

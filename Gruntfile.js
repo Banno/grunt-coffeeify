@@ -47,12 +47,18 @@ module.exports = function(grunt) {
       },
       custom_options: {
         options: {
-          separator: ': ',
-          punctuation: ' !!!',
+          transform: 'coffeeify',
+          insertGlobals: false,
+          detectGlobals: true,
+          ignoreMissing: false,
+          debug: true
         },
-        files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123'],
-        },
+        files: [
+          {
+            src: 'test/fixtures/main.coffee',
+            dest: 'tmp/customBundle.js'
+          }
+        ],
       },
     },
 
