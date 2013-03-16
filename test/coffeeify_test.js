@@ -33,11 +33,13 @@ exports.coffeeify = {
     
     test.expect(1);
     expected = {
-      transform: 'coffeeify',
-      insertGlobals: false,
-      detectGlobals: true,
-      ignoreMissing: false,
-      debug: false,
+      options: {
+        transform: 'coffeeify',
+        insertGlobals: false,
+        detectGlobals: true,
+        ignoreMissing: false,
+        debug: false,
+      },
       files: [
 	{
           src: 'test/fixtures/main.coffee', dest: 'tmp/bundle.js'
