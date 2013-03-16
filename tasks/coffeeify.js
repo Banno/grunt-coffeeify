@@ -15,10 +15,15 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('coffeeify', 'Your task description goes here.', function() {
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
-    });
+    var options = this.options(
+      {
+        transform: 'coffeeify',
+        insertGlobals: false,
+        detectGlobals: true,
+        ignoreMissing: false,
+        debug: false
+      }
+    );
 
     // Iterate over all specified file groups.
     this.files.forEach(function(f) {
