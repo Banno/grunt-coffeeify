@@ -27,6 +27,7 @@ exports.coffeeify = {
     // setup here if necessary
     done();
   },
+
   default_options: function(test) {
     var expected;
     
@@ -45,8 +46,31 @@ exports.coffeeify = {
     };
     
     var actual = grunt.config.get(['coffeeify']).default_options;
-    test.deepEqual(actual, expected, 'default_options should include transfomr:"coffeeify", insertGlobals: false, detectGlobals: false, debug: false');    
+    test.deepEqual(actual, expected, 'default_options should be correct for tests.');    
     
+    test.done();
+  },
+
+  custom_options: function(test) {
+    var expected;
+
+    test.expect(1);
+
+    expected = {
+      transform: 'coffeeify',
+      insertGlobals: false,
+      detectGlobals: true,
+      ignoreMissing: false,
+      debug: true,
+      files: [
+	{
+          src: 'test/fixtures/main/coffee', dest: 'tmp/customBundle.js'
+	}
+      ]
+    };
+
+    var actual = grunt.config.get(['coffeeify']).custom_options;
+    test.deepEqual(actual, expected, 'custom options should be correct for tests.');
     test.done();
   },
   default_options_output: function(test) {
