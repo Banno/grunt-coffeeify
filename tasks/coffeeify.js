@@ -7,70 +7,36 @@
  */
 
 'use strict';
-
+var browserify = require('browserify');
 var coffeeify = require('coffeeify');
 
 module.exports = function(grunt) {
-
-  
-  var coffeeify, filterToBrowserifyOptions, eitherSuccessOrFailure;
-
-  eitherSuccessOrFailure = function(options, dest) {
-    
-    return function(error, src) {
-      var outputSrc;
-      if(this.errorCount > 1) return false;
-      if(error) {
-        grunt.log.error([error]);
-        return false;
-      } else {
-        if(options.prepend) outputSrc = options.prepend;
-        outputSrc += src;
-        if(options.append) outputSrc += options.append;
-        grunt.file.write(dest, outputSrc);
-        grunt.log.oklns('Coffeeified"' + dest + '".');
-      }
-    };
-  };
-
-  coffeeifyFunction = function(options) {
-    var browserifyOptions = filterToBrowserifyOptions(options),
-    browserifyInstance = browserify(browerifyOptions);
-
-    return function(filepath, options, dest) {
-      if(filepath == null && filepath == undefined && filepath == ''){
-        return browserifyInstance.bundle(browserifyOptions, eitherSuccessOrFailure(options, dest))
-      }else{
-        browserifyInstance.add(filepath);
-        grunt.verbose.log.oklns("Added " + filepath + "to browserify entry points.");
-      }
-    }
-  };
-  
-  filterToBrowserifyOptions = function(options) {
-    var browserifyOptions = {}, validOptionKeys = [
-      'outfile',
-      'require',
-      'ignore',
-      'external',
-      'insertGlobals',
-      'detectGlobals',
-      'ignoreMissing',
-      'debug'
-    ];
-    for(var keyName in options){
-      if(validOptionKeys.indexOf(keyName) !== -1){
-        browserifyOptions[keyName] = options[keyName];
-      }
-    }
-    
-    return browserifyOptions;
-  };
 
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
   grunt.registerMultiTask('coffeeify', 'Your task description goes here.', function() {
+    // asynchronous task
+    var done = this.async(),
+    errorCount = this.errorCount = 0,
+    finalizer = function(error, result) {
+      if(error){
+        grunt.verbose.error("Coffeeify failed with error: " + error);
+      } else if(errorCount) {
+        grunt.fail.warn("Coffeeify failed.");
+      } else {
+        done(result);
+      }
+    }, coffeifyWithOptions = function(options){
+      var browserifyInstance = browserify(options);
+      return function(filepath, destination) {
+        browserifyInstance.add(filepath, destination);
+        grunt.verbose.log("Added to " + destination + " : " + filepath);
+        browserifyInstance;
+      };
+    };
+    
+
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options(
       {
@@ -80,36 +46,44 @@ module.exports = function(grunt) {
         ignoreMissing: false,
         debug: false
       }
-    ), compiler;
+    );
 
     grunt.verbose.writeFlags(options, 'Options');
 
     // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
+    this.files.map(function(fileObject) {
+      fileObject.src = fileObject.src.filter(function(filepath) {
+
+        //filter out non-extant paths
+        if(!grunt.file.exists(filepath)) {
+          grunt.verbose.writeln(grunt.log.wraptext("Non-extant filepath: "+ filepath));
           return false;
-        } else {
-          return true;
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return coffeeifyFunction(filepath, options, f.dest);
-      }).join(grunt.util.normalizelf(options.separator));
+        return true;
+      });
 
-
-      // Handle options.
-      src += options.punctuation;
-
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
-
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
-    });
+      // return the modified fileObject
+      return fileObject;
+    }).map(function(fileObject) {
+      // create an independent browserify instance and bind the options
+      // to it for the current fileObject
+      var browserifyFileObject = coffeeifyWithOptions(options),
+      // keep the destination in context for all src filepaths
+      destination = fileObject.dest,
+      // map all the sources in this filepath object.
+      // the browserifyFileObject is a kestrel,
+      // so this returns a list of identical
+      // browserify instances with the src
+      // paths added to its compilation queue.
+      return fileObject.src.map(function(filepath){
+        return browserifyFileObject(filepath, dest);
+      // reduce the list of identical browserify instances to a single instance
+      // resulting in a list of fileObject bound browserify instances
+      }).reduce(function(previousInstance, currentInstance, index, array) {
+        return currentVal;
+      }, {});
+    // how to dealy calling the finialize until all the bundles have been
+    // created?
+    }).
   });
-
 };
