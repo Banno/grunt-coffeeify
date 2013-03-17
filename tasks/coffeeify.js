@@ -9,6 +9,7 @@
 'use strict';
 var browserify = require('browserify');
 var coffeeify = require('coffeeify');
+var when = require('when');
 
 module.exports = function(grunt) {
 
@@ -32,7 +33,7 @@ module.exports = function(grunt) {
       return function(filepath, destination) {
         browserifyInstance.add(filepath, destination);
         grunt.verbose.log("Added to " + destination + " : " + filepath);
-        browserifyInstance;
+        return {dest: destination, instance: browserifyInstance};
       };
     };
     
@@ -51,7 +52,7 @@ module.exports = function(grunt) {
     grunt.verbose.writeFlags(options, 'Options');
 
     // Iterate over all specified file groups.
-    this.files.map(function(fileObject) {
+    when.all(this.files.map(function(fileObject) {
       fileObject.src = fileObject.src.filter(function(filepath) {
 
         //filter out non-extant paths
@@ -82,8 +83,35 @@ module.exports = function(grunt) {
       }).reduce(function(previousInstance, currentInstance, index, array) {
         return currentVal;
       }, {});
-    // how to dealy calling the finialize until all the bundles have been
-    // created?
-    }).
+    // use promises to resolve callbacks correctly,
+    // returning a list of promises that we can use.
+    }).map(function(browserifyInstance){
+      var deferred, promise;
+      deferred = when.defer();
+      
+      browserifyInstance.bundle({}, function(error, success){
+        if(error){
+          deferred.reject(error);
+          return;
+        }
+        
+        deferred.resolve(success);
+      });
+      return deferred.promise;
+    })).then(
+      function writeSources(sources) {
+        
+      },
+      function failBuild() {
+
+      }
+    ).then(
+      function finalizeBuild(count){
+      
+      },
+      function failBuild(error){
+
+      }
+    );
   });
 };
