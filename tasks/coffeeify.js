@@ -20,15 +20,7 @@ module.exports = function(grunt) {
     // asynchronous task
     var done = this.async(),
     errorCount = this.errorCount = 0,
-    finalizer = function(error, result) {
-      if(error){
-        grunt.verbose.error("Coffeeify failed with error: " + error);
-      } else if(errorCount) {
-        grunt.fail.warn("Coffeeify failed.");
-      } else {
-        done(result);
-      }
-    }, coffeifyWithOptions = function(options){
+    coffeifyWithOptions = function(options){
       var browserifyInstance = browserify(options);
       return function(filepath, destination) {
         browserifyInstance.add(filepath, destination);
@@ -89,28 +81,67 @@ module.exports = function(grunt) {
       var deferred, promise;
       deferred = when.defer();
       
-      browserifyInstance.bundle({}, function(error, success){
+      browserifyInstance.instance.bundle({}, function(error, contents){
+        var finalFileContents = '';
+        // We broke the build on this one.
+        // Resolve the deferred and exit early.
         if(error){
           deferred.reject(error);
+
           return;
         }
         
-        deferred.resolve(success);
+        // If there are contents to prepend,
+        // add them to the contents to be
+        // be written.
+        if(options.prepend){
+          finalFileContents += options.prepend;
+        }
+        // Add the contents of the browserify 
+        // process to the contents to be
+        // written.
+        finalFileContents += contents;
+        // If there are contents to append,
+        // add them to the contents to be
+        // written.
+        if(options.append){
+          finalFileContents += options.append;
+        }
+        // Write the contents to disk.
+        grunt.file.write(browserifyInstance.dest, finalFileContents);
+        grunt.verbose.oklns("Coffeeified: " + browserifyInstance.dest);
+        // resolve the deferred for the current fileObject.
+        deferred.resolve(browserifyInstance.dest);
       });
+
+      // return the promise so when.all can handle
+      // the deferred resolutions with then.
       return deferred.promise;
     })).then(
-      function writeSources(sources) {
-        
+      // All of the promises succeeded, report the success.
+      function reportSources(filelocations) {
+        return {count: sources.length, locations:filelocations.join("\n")};
       },
-      function failBuild() {
-
+      // There was at least one failure. Fail the build.
+      function failBuild(error) {
+        errorCount += 1;
+        grunt.fail.warn(error);
       }
     ).then(
-      function finalizeBuild(count){
-      
+      // Finalize the task.
+      function finalizeBuild(sourceReport){
+        // Something went wrong. Fail the build.
+        if(errorCount > 0) {
+          grunt.fail.warn("Coffeeification failed.");
+        // The build succeeded. Call done to 
+        // finish the grunt task.
+        } else {
+          done("Coffeified " + sourceReport.count + ": " + sourceReport.locations);
+        }
       },
+      // Shouldn't ever reach here, but jic.
       function failBuild(error){
-
+        grunt.fail.warn(error);
       }
     );
   });
