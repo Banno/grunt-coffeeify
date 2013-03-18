@@ -63,9 +63,9 @@ module.exports = function(grunt) {
         ],
       },
 
-      omit_c_coffee: {
+      require_when: {
         options: {
-          ignore: ["test/fixtures/c.*"],
+          requires: ["./test/fixtures/123", "when"],
           insertGlobals: false,
           detectGlobals: true,
           ignoreMissing: false,
@@ -73,7 +73,7 @@ module.exports = function(grunt) {
         },
         files: [
           {
-            src: 'test/fixtures/main.coffee', dest: 'tmp/default_options'
+            src: 'test/fixtures/main.coffee', dest: 'tmp/require_when'
           }
         ]
       }

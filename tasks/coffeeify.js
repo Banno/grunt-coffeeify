@@ -79,14 +79,32 @@ module.exports = function(grunt) {
     // use promises to resolve callbacks correctly,
     // returning a list of promises that we can use.
     }).map(function(browserifyInstance){
-      var deferred, promise, transforms;
+      var deferred, promise, transforms, requires;
 
       deferred = when.defer();
       transforms = options.transforms || [];
+      requires = options.requires || [];
       // for each transform in the transforms option,
       // apply it to the browserify instance.
       transforms.forEach(function(transform){
         browserifyInstance.instance.transform(transform);        
+      });
+
+      // map over the requires,
+      // first checking to see if the file is 
+      // a filepath or a module, then add
+      // them to the browserify instance
+      requires.forEach(function(moduleOrFilepath){
+        var moduleAsFilePaths = grunt.file.expand([moduleOrFilepath]),
+        moduleIsFilePath = moduleAsFilePaths.length === 0 ? false : true;
+        grunt.verbose.writeln("moduleOrFilepath: " + moduleAsFilePaths);
+        if(moduleIsFilePath) {
+          moduleAsFilePaths.forEach(function(filepath) {
+            browserifyInstance.instance.require(filepath);
+          });
+        } else {
+          browserifyInstance.instance.require(moduleOrFilepath);
+        }
       });
 
       // bundle the sources and prepend/appends

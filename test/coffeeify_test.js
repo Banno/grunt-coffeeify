@@ -81,14 +81,14 @@ exports.coffeeify = {
     test.done();
   },
   
-  omit_c_coffee: function(test) {
+  require_when: function(test) {
     var expected;
     
     test.expect(1);
     
     expected = {
       options: {
-        ignore: ["test/fixtures/c.*"],
+        requires: ["./test/fixtures/123", "when"],
         insertGlobals: false,
         detectGlobals: true,
         ignoreMissing: false,
@@ -96,13 +96,13 @@ exports.coffeeify = {
       },
       files: [
 	{
-          src: 'test/fixtures/main.coffee', dest: 'tmp/default_options'
+          src: 'test/fixtures/main.coffee', dest: 'tmp/require_when'
 	}
       ]
     };
     
-    var actual = grunt.config.get(['coffeeify']).omit_c_coffee;
-    test.deepEqual(actual, expected, 'omit_c_coffee should be correct for tests.');
+    var actual = grunt.config.get(['coffeeify']).require_when;
+    test.deepEqual(actual, expected, 'require_when options should be correct for tests.');
 
     test.done();
   }, 
@@ -112,7 +112,8 @@ exports.coffeeify = {
 
     var actual = grunt.file.read('tmp/default_options');
     var expected = grunt.file.read('test/expected/default_options');
-    test.equal(actual, expected, 'should describe what the default behavior is.');
+    
+    test.equal(actual, expected, 'should coffeeify using the defaults correctly.');
 
     test.done();
   },
@@ -122,8 +123,20 @@ exports.coffeeify = {
 
     var actual = grunt.file.read('tmp/custom_options');
     var expected = grunt.file.read('test/expected/custom_options');
-    test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
+    test.equal(actual, expected, 'should coffeeify using the custom_options target correctly.');
 
+    test.done();
+  },
+  
+  require_when_output: function(test) {
+    test.expect(2);
+
+    var actual = grunt.file.read('tmp/require_when');
+    var hasWhenModule = actual.indexOf("\"when\":[function") !== -1;
+    var has123 = actual.indexOf("\"./test/fixtures/123\":[function") !== -1;
+    test.ok(hasWhenModule, "The bundled source should contain the when module.");
+    test.ok(has123, "The bundled source should contain the required 123 file.");
+    
     test.done();
   }
 };
