@@ -77,8 +77,36 @@ exports.coffeeify = {
 
     var actual = grunt.config.get(['coffeeify']).custom_options;
     test.deepEqual(actual, expected, 'custom options should be correct for tests.');
+
     test.done();
   },
+  
+  omit_c_coffee: function(test) {
+    var expected;
+    
+    test.expect(1);
+    
+    expected = {
+      options: {
+        ignore: ["test/fixtures/c.*"],
+        insertGlobals: false,
+        detectGlobals: true,
+        ignoreMissing: false,
+        debug: false
+      },
+      files: [
+	{
+          src: 'test/fixtures/main.coffee', dest: 'tmp/default_options'
+	}
+      ]
+    };
+    
+    var actual = grunt.config.get(['coffeeify']).omit_c_coffee;
+    test.deepEqual(actual, expected, 'omit_c_coffee should be correct for tests.');
+
+    test.done();
+  }, 
+
   default_options_output: function(test) {
     test.expect(1);
 
@@ -88,6 +116,7 @@ exports.coffeeify = {
 
     test.done();
   },
+
   custom_options_output: function(test) {
     test.expect(1);
 
@@ -96,5 +125,5 @@ exports.coffeeify = {
     test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
 
     test.done();
-  },
+  }
 };
