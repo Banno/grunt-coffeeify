@@ -62,6 +62,21 @@ module.exports = function(grunt) {
           }
         ],
       },
+
+      omit_c_coffee: {
+        options: {
+          ignore: ["test/fixtures/c.*"],
+          insertGlobals: false,
+          detectGlobals: true,
+          ignoreMissing: false,
+          debug: false
+        },
+        files: [
+          {
+            src: 'test/fixtures/main.coffee', dest: 'tmp/default_options'
+          }
+        ]
+      }
     },
 
     // Unit tests.
