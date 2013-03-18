@@ -1,6 +1,7 @@
 'use strict';
 
 var grunt = require('grunt');
+var coffeeify = require('coffeeify');
 
 /*
   ======== A Handy Little Nodeunit Reference ========
@@ -34,7 +35,6 @@ exports.coffeeify = {
     test.expect(1);
     expected = {
       options: {
-        transform: 'coffeeify',
         insertGlobals: false,
         detectGlobals: true,
         ignoreMissing: false,
@@ -42,7 +42,7 @@ exports.coffeeify = {
       },
       files: [
 	{
-          src: 'test/fixtures/main.coffee', dest: 'tmp/bundle.js'
+          src: 'test/fixtures/main.coffee', dest: 'tmp/default_options'
 	}
       ]
     };
@@ -60,7 +60,9 @@ exports.coffeeify = {
 
     expected = {
       options: {
-        transform: 'coffeeify',
+        prepend: '/* This is a prepend test! */',
+        append: '/* This is an append test! */',
+        transforms: [coffeeify],
         insertGlobals: false,
         detectGlobals: true,
         ignoreMissing: false,
@@ -68,7 +70,7 @@ exports.coffeeify = {
       },
       files: [
 	{
-          src: 'test/fixtures/main.coffee', dest: 'tmp/customBundle.js'
+          src: 'test/fixtures/main.coffee', dest: 'tmp/custom_options'
 	}
       ]
     };

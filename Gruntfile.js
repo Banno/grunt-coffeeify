@@ -7,6 +7,7 @@
  */
 
 'use strict';
+var coffeeify = require('coffeeify');
 
 module.exports = function(grunt) {
 
@@ -32,7 +33,6 @@ module.exports = function(grunt) {
     coffeeify: {
       default_options: {
         options: {
-          transform: 'coffeeify',
           insertGlobals: false,
           detectGlobals: true,
           ignoreMissing: false,
@@ -41,13 +41,15 @@ module.exports = function(grunt) {
         files: [
           {
             src: 'test/fixtures/main.coffee',
-            dest: 'tmp/bundle.js'
+            dest: 'tmp/default_options'
           }
         ],
       },
       custom_options: {
         options: {
-          transform: 'coffeeify',
+          transforms: [coffeeify],
+          prepend: '/* This is a prepend test! */',
+          append: '/* This is an append test! */',
           insertGlobals: false,
           detectGlobals: true,
           ignoreMissing: false,
@@ -56,7 +58,7 @@ module.exports = function(grunt) {
         files: [
           {
             src: 'test/fixtures/main.coffee',
-            dest: 'tmp/customBundle.js'
+            dest: 'tmp/custom_options'
           }
         ],
       },

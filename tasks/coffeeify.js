@@ -7,33 +7,35 @@
  */
 
 'use strict';
+var path = require('path');
 var browserify = require('browserify');
 var coffeeify = require('coffeeify');
 var when = require('when');
 
 module.exports = function(grunt) {
 
+  
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
   grunt.registerMultiTask('coffeeify', 'Your task description goes here.', function() {
     // asynchronous task
     var done = this.async(),
-    errorCount = this.errorCount = 0,
-    coffeifyWithOptions = function(options){
-      var browserifyInstance = browserify(options);
-      return function(filepath, destination) {
-        browserifyInstance.add(filepath, destination);
-        grunt.verbose.log("Added to " + destination + " : " + filepath);
-        return {dest: destination, instance: browserifyInstance};
-      };
+    errorCount = this.errorCount,
+    coffeeifyInstance = function(src, destination){
+      grunt.verbose.writeln("Adding entries to be coffeeified/browserified: " +src);
+      var browserifyInstance = browserify(src);
+      return {dest: destination, instance: browserifyInstance};
     };
     
 
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options(
       {
-        transform: 'coffeeify',
+        // include coffeeify by default
+        // since it doesn't hurt plain 
+        // js
+        transforms: [coffeeify],
         insertGlobals: false,
         detectGlobals: true,
         ignoreMissing: false,
@@ -41,53 +43,59 @@ module.exports = function(grunt) {
       }
     );
 
-    grunt.verbose.writeFlags(options, 'Options');
+    grunt.verbose.writeln('Options :' + JSON.stringify(options));
 
     // Iterate over all specified file groups.
     when.all(this.files.map(function(fileObject) {
-      fileObject.src = fileObject.src.filter(function(filepath) {
+      var newFileObject = {}, keys, length;
+      // create a mutable copy of the fileObject
+      for(keys = Object.keys(fileObject), length = keys.length; length; --length) {
+        newFileObject[keys[length -1]] = fileObject[keys[length-1]];
+      }
+      // filter out any non-existing paths
 
-        //filter out non-extant paths
+      newFileObject.src = newFileObject.src.filter(function(filepath) {
         if(!grunt.file.exists(filepath)) {
-          grunt.verbose.writeln(grunt.log.wraptext("Non-extant filepath: "+ filepath));
+          grunt.verbose.writeln("Non-extant filepath: "+ filepath);
+
           return false;
         }
+
         return true;
+      // make the paths absolute so that browserify is happy
+      }).map(function(filepath){
+        return path.resolve(filepath);
       });
 
       // return the modified fileObject
-      return fileObject;
+      return newFileObject;
+    // map over the fileobjects and browserify them
     }).map(function(fileObject) {
-      // create an independent browserify instance and bind the options
-      // to it for the current fileObject
-      var browserifyFileObject = coffeeifyWithOptions(options),
-      // keep the destination in context for all src filepaths
-      destination = fileObject.dest,
-      // map all the sources in this filepath object.
-      // the browserifyFileObject is a kestrel,
-      // so this returns a list of identical
-      // browserify instances with the src
-      // paths added to its compilation queue.
-      return fileObject.src.map(function(filepath){
-        return browserifyFileObject(filepath, dest);
-      // reduce the list of identical browserify instances to a single instance
-      // resulting in a list of fileObject bound browserify instances
-      }).reduce(function(previousInstance, currentInstance, index, array) {
-        return currentVal;
-      }, {});
+      // create an independent browserify instance, bind the 
+      // src paths to it, and create an object containing
+      // the instance and the final destination
+      return coffeeifyInstance(fileObject.src, fileObject.dest);
+    // keep the destination in context for all src filepaths
     // use promises to resolve callbacks correctly,
     // returning a list of promises that we can use.
     }).map(function(browserifyInstance){
-      var deferred, promise;
+      var deferred, promise, transforms;
+
       deferred = when.defer();
-      
-      browserifyInstance.instance.bundle({}, function(error, contents){
+      transforms = options.transforms || [];
+      // for each transform in the transforms option,
+      // apply it to the browserify instance.
+      transforms.forEach(function(transform){
+        browserifyInstance.instance.transform(transform);        
+      });
+
+      // bundle the sources and prepend/appends
+      browserifyInstance.instance.bundle(options, function(error, contents){
         var finalFileContents = '';
         // We broke the build on this one.
         // Resolve the deferred and exit early.
         if(error){
           deferred.reject(error);
-
           return;
         }
         
@@ -95,7 +103,7 @@ module.exports = function(grunt) {
         // add them to the contents to be
         // be written.
         if(options.prepend){
-          finalFileContents += options.prepend;
+          finalFileContents += options.prepend + "\n";
         }
         // Add the contents of the browserify 
         // process to the contents to be
@@ -105,11 +113,14 @@ module.exports = function(grunt) {
         // add them to the contents to be
         // written.
         if(options.append){
-          finalFileContents += options.append;
+          finalFileContents += "\n" + options.append;
         }
+
         // Write the contents to disk.
         grunt.file.write(browserifyInstance.dest, finalFileContents);
+
         grunt.verbose.oklns("Coffeeified: " + browserifyInstance.dest);
+
         // resolve the deferred for the current fileObject.
         deferred.resolve(browserifyInstance.dest);
       });
@@ -119,8 +130,8 @@ module.exports = function(grunt) {
       return deferred.promise;
     })).then(
       // All of the promises succeeded, report the success.
-      function reportSources(filelocations) {
-        return {count: sources.length, locations:filelocations.join("\n")};
+      function reportSources(fileLocationsReport) {
+        return {count: fileLocationsReport.length, locations:fileLocationsReport.join("\n")};
       },
       // There was at least one failure. Fail the build.
       function failBuild(error) {
