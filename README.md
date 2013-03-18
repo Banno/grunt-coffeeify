@@ -2,6 +2,10 @@
 
 > A grunt plugin for browserifying your coffee + js projects!
 
+grunt-coffeeify is a Browserify ~2.6.0 compatible browserifier. It is a grunt multitask. It supports browserify require, browserify debug, browserify transform, insert-globals, and ignore-missing. It is intended to replace the grunt-browserify grunt plugin for grunt >= 0.4.1.
+
+Thanks to @substack for the wonderful browserify and coffeeify node modules.
+
 ## Getting Started
 This plugin requires Grunt `~0.4.1`
 
@@ -37,47 +41,98 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
+#### options.insertGlobals
+Type: `Boolean`
+Default value: false
+
+Skip detection and always insert definitions for process, global, __filename, and __dirname.
+
+benefit: faster builds
+cost: extra bytes
+
+#### options.detectGlobals
+Type: `Boolean`
+Default value: true
+
+Detect the presence of process, global, __filename, and __dirname and define these values when present.
+
+benefit: npm modules are more likely to work
+cost: slower builds
+
+#### options.ignoreMissing
+Type: `Boolean`
+Default value: false
+
+Ignore `require()` statements that don't resolve to anything.
+
+#### options.debug
+Type: `Boolean`
+Default value: false
+
+Enable source maps that allow you to debug your files separately.
+
+#### options.requires
+Type: `Array`
+Default value: null
+
+An array of npm module names or relative paths to files to include in the bundle.
+
+#### options.transforms
+Type: `Array`
+Default value: [coffeeify]
+
+An array of functions fitting the signature:
+```js
+function(file) {
+   ...
+   return through();
+}
+```
+
+where ```through()``` is a [through-stream](https://github.com/substack/stream-handbook#through).  The [coffeeify](https://github.com/substack/coffeeify) transform by default, which compiles all coffee-script source files while browserifying them.
+
+
+#### options.prepend
 Type: `String`
-Default value: `',  '`
+Default value: ''
 
-A string value that is used to do something with whatever.
+String to prepend to the bundle. Useful for licenses or banners, for example.
 
-#### options.punctuation
+#### options.append
 Type: `String`
-Default value: `'.'`
+Default value: ''
 
-A string value that is used to do something else with whatever else.
+String to append to the bundle.
 
 ### Usage Examples
 
 #### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+In this example, the default options are used to coffeeify a project with mixed js and coffee-script source files. The files array can have many src/dest file objects. src path glob patterns are supported by [minimatch](https://github.com/isaacs/minimatch). This example will resolve all requires and compile all coffee files when bundling.
 
 ```js
 grunt.initConfig({
   coffeeify: {
     options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+    files: [
+      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
+    ]
   },
 })
 ```
 
 #### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
-
+This example is similar, but I have included the non-default requires, transforms, and debug options. This example will bundle the source like before, including the when js module, and brfs and coffeeify transforms, as well as generate sourcemaps for all required files. Note the file requires need to be specified as relative to the Gruntfile.
 ```js
 grunt.initConfig({
   coffeeify: {
     options: {
-      separator: ': ',
-      punctuation: ' !!!',
+      transforms: [brfs],
+      requires: ['when', './relative/path/to/file/from/here.js'],
+      debug: true
     },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+    files: [
+      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
+    ]
   },
 })
 ```
@@ -87,3 +142,6 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 _(Nothing yet)_
+
+## Issues
+Please use the (github issues list)[https://github.com/jackcviers/grunt-coffeeify/issues] to report any issues. If possible, please include a link to an open github repo with the smallest failing example of your issue. Even better, fork the project, create a failing test case and issue a pull request with the issue number referenced in the pull request. Even better than thant, fork the project create a failing test case, fix the problem, and issue a pull request with the test and fix referencing the issue number. 
