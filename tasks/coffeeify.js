@@ -80,7 +80,8 @@ module.exports = function(grunt) {
     // returning a list of promises that we can use.
     }).map(function(browserifyInstance){
       var deferred, promise, transforms, requires;
-
+      
+      grunt.verbose.writeln('Preparing to coffeeify');
       deferred = when.defer();
       transforms = options.transforms || [];
       requires = options.requires || [];
@@ -89,7 +90,6 @@ module.exports = function(grunt) {
       transforms.forEach(function(transform){
         browserifyInstance.instance.transform(transform);        
       });
-
       // map over the requires,
       // first checking to see if the file is 
       // a filepath or a module, then add
@@ -106,7 +106,6 @@ module.exports = function(grunt) {
           browserifyInstance.instance.require(moduleOrFilepath);
         }
       });
-
       // bundle the sources and prepend/appends
       browserifyInstance.instance.bundle(options, function(error, contents){
         var finalFileContents = '';
@@ -133,7 +132,6 @@ module.exports = function(grunt) {
         if(options.append){
           finalFileContents += "\n" + options.append;
         }
-
         // Write the contents to disk.
         grunt.file.write(browserifyInstance.dest, finalFileContents);
 
@@ -173,5 +171,6 @@ module.exports = function(grunt) {
         grunt.fail.warn(error);
       }
     );
+
   });
 };
