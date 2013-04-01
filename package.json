@@ -1,7 +1,7 @@
 {
   "name": "grunt-coffeeify",
   "description": "A grunt plugin for browserifying your coffee + js projects!",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/Banno/grunt-coffeeify",
   "author": {
     "name": "Jack Viers",
