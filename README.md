@@ -113,9 +113,12 @@ In this example, the default options are used to coffeeify a project with mixed 
 grunt.initConfig({
   coffeeify: {
     options: {},
-    files: [
-      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
-    ]
+    files:
+      {
+        src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'],
+        dest:'dist/myApp.js'
+      }
+
   },
 })
 ```
@@ -130,9 +133,10 @@ grunt.initConfig({
       requires: ['when', './relative/path/to/file/from/here.js'],
       debug: true
     },
-    files: [
-      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
-    ]
+    files: {
+      src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'],
+      dest:'dist/myApp.js'
+    }
   },
 })
 ```
@@ -144,4 +148,4 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 _(Nothing yet)_
 
 ## Issues
-Please use the [github issues list](https://github.com/Banno/grunt-coffeeify/issues) to report any issues. If possible, please include a link to an open github repo with the smallest failing example of your issue. Even better, fork the project, create a failing test case and issue a pull request with the issue number referenced in the pull request. Even better than thant, fork the project create a failing test case, fix the problem, and issue a pull request with the test and fix referencing the issue number. 
+Please use the [github issues list](https://github.com/Banno/grunt-coffeeify/issues) to report any issues. If possible, please include a link to an open github repo with the smallest failing example of your issue. Even better, fork the project, create a failing test case and issue a pull request with the issue number referenced in the pull request. Even better than thant, fork the project create a failing test case, fix the problem, and issue a pull request with the test and fix referencing the issue number.
