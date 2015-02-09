@@ -112,27 +112,34 @@ In this example, the default options are used to coffeeify a project with mixed 
 ```js
 grunt.initConfig({
   coffeeify: {
-    options: {},
-    files: [
-      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
-    ]
-  },
+    basic: {
+      options: {},
+      files: [{
+          src: ['path/to/src/**/*.coffee', 'path/to/src/**/*.js'],
+          dest: 'dist/myApp.js'
+      }]
+    }
+  }
 })
 ```
 
 #### Custom Options
 This example is similar, but I have included the non-default requires, transforms, and debug options. This example will bundle the source like before, including the when js module, and brfs and coffeeify transforms, as well as generate sourcemaps for all required files. Note the file requires need to be specified as relative to the Gruntfile.
+
 ```js
 grunt.initConfig({
   coffeeify: {
-    options: {
-      transforms: [brfs],
-      requires: ['when', './relative/path/to/file/from/here.js'],
-      debug: true
-    },
-    files: [
-      {src:['path/to/src/**/*.coffee', 'path/to/src/**/*.js'], dest:'dist/myApp.js'}
-    ]
+    custom: {
+      options: {
+        transforms: [brfs],
+        requires: ['when', './relative/path/to/file/from/here.js'],
+        debug: true
+      },
+      files: [{
+        src: ['path/to/src/**/*.coffee', 'path/to/src/**/*.js'],
+        dest: 'dist/myApp.js'
+      }]
+    }
   },
 })
 ```
@@ -144,4 +151,4 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 _(Nothing yet)_
 
 ## Issues
-Please use the [github issues list](https://github.com/Banno/grunt-coffeeify/issues) to report any issues. If possible, please include a link to an open github repo with the smallest failing example of your issue. Even better, fork the project, create a failing test case and issue a pull request with the issue number referenced in the pull request. Even better than thant, fork the project create a failing test case, fix the problem, and issue a pull request with the test and fix referencing the issue number. 
+Please use the [github issues list](https://github.com/Banno/grunt-coffeeify/issues) to report any issues. If possible, please include a link to an open github repo with the smallest failing example of your issue. Even better, fork the project, create a failing test case and issue a pull request with the issue number referenced in the pull request. Even better than thant, fork the project create a failing test case, fix the problem, and issue a pull request with the test and fix referencing the issue number.
