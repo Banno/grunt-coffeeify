@@ -1,3 +1,5 @@
+> **This project is no longer maintained.** Please use an alternative such as [grunt-browserify](https://github.com/jmreidy/grunt-browserify).
+
 # grunt-coffeeify
 
 > A grunt plugin for browserifying your coffee + js projects!
